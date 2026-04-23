@@ -1,131 +1,125 @@
-# Dashboard Cobrança Extrajudicial
+🚀 MIS - Management Information System
 
-Sistema completo de gestão para setor de cobrança extrajudicial.
+Sistema completo para gestão de cobranças, acordos e recuperação de crédito.
 
-## Stack
+📌 Sobre o Projeto
 
-- **Banco de dados:** PostgreSQL 15
-- **Backend:** Node.js + Express + Prisma ORM (TypeScript)
-- **Frontend:** React 18 + Vite + Tailwind CSS + Recharts
+O MIS (Management Information System) é uma aplicação fullstack voltada para gestão de dívidas e recuperação financeira, permitindo controle de:
 
----
+📊 Dashboard com métricas
+💰 Acordos
+📄 Boletos
+📞 Acionamentos
+👥 Devedores
+📈 Recuperações
+🧠 Funcionalidades
+📊 Dashboard
+KPIs de recuperação
+Visão geral de performance
+💰 Acordos
+Criação e gerenciamento de acordos
+Controle de status
+📄 Boletos
+Emissão e listagem
+Acompanhamento de pagamento
+📞 Acionamentos
+Registro de contatos com clientes
+👥 Devedores
+Gestão de clientes inadimplentes
+📈 Recuperações
+Monitoramento de valores recuperados
+🏗️ Arquitetura do Projeto
+📦 MIS
+ ┣ 📂 backend        # API Node.js + Prisma
+ ┣ 📂 frontend       # React + Vite + Tailwind
+ ┣ 📂 database       # Scripts SQL
+ ┣ 📜 docker-compose.yml
+ ┗ 📜 README.md
+🚀 Tecnologias Utilizadas
+💻 Backend
+Node.js
+TypeScript
+Express
+Prisma ORM
+🎨 Frontend
+React
+Vite
+TailwindCSS
+Context API
+🗄️ Banco de Dados
+PostgreSQL (via Prisma)
+🐳 DevOps
+Docker
+Docker Compose
+Nginx
+⚙️ Como Rodar o Projeto
+🔧 Pré-requisitos
+Docker + Docker Compose
+▶️ Subir tudo com Docker
+docker-compose up --build
 
-## Início Rápido — Docker (recomendado)
+A aplicação estará disponível em:
 
-```bash
-# Suba todos os serviços (DB + API + UI)
-docker-compose up -d
-
-# Acompanhe os logs
-docker-compose logs -f
-```
-
-| Serviço  | URL                    |
-|----------|------------------------|
-| Frontend | http://localhost       |
-| Backend  | http://localhost:3001  |
-| Postgres | localhost:5432         |
-
-> O seed é aplicado automaticamente na primeira execução.
-
----
-
-## Desenvolvimento local
-
-### Pré-requisitos
-- Node.js 20+
-- PostgreSQL 15 rodando localmente
-
-### Backend
-
-```bash
+Frontend: http://localhost
+Backend: http://localhost:3000
+⚙️ Rodar manualmente (dev)
+Backend
 cd backend
-cp .env.example .env
-# Edite DATABASE_URL em .env com suas credenciais
-
 npm install
-npx prisma generate
-npx prisma migrate dev --name init
-npx prisma db seed
+cp .env.example .env
+npx prisma migrate dev
 npm run dev
-```
-
-A API estará disponível em `http://localhost:3001`.
-
-### Frontend
-
-```bash
+Frontend
 cd frontend
 npm install
 npm run dev
-```
+🧪 Estrutura da API
 
-O app estará disponível em `http://localhost:5173`.
+Principais rotas:
 
-> Por padrão o frontend usa **dados mock** embutidos (sem precisar da API).  
-> Para conectar à API real, crie `frontend/.env` com:
-> ```
-> VITE_USE_MOCK=false
-> VITE_API_URL=http://localhost:3001/api
-> ```
+/api/dashboard
+/api/acordos
+/api/boletos
+/api/acionamentos
+/api/dividas
+/api/recuperacoes
+🧩 Destaques Técnicos
+Arquitetura modular (controllers, services, routes)
+Separação clara entre frontend e backend
+Uso de Prisma para ORM
+Componentização no React
+Sistema preparado para escala
+🖼️ Interface
 
----
+Interface moderna com:
 
-## Estrutura do Projeto
+Sidebar
+Topbar
+Tabelas dinâmicas
+KPIs visuais
+Modais reutilizáveis
+📊 Status do Projeto
 
-```
-MIS/
-├── database/
-│   └── init.sql              # Schema + indexes + view + seed SQL
-├── backend/
-│   ├── prisma/
-│   │   ├── schema.prisma     # Modelos Prisma
-│   │   └── seed.ts           # Seed TypeScript
-│   └── src/
-│       ├── index.ts          # Entry point Express
-│       ├── routes/           # Routers por entidade
-│       ├── controllers/      # Handlers HTTP
-│       ├── services/         # Lógica de negócio + Prisma
-│       └── middlewares/      # Error handler
-├── frontend/
-│   └── src/
-│       ├── pages/            # Dashboard, Acionamentos, Boletos, etc.
-│       ├── components/
-│       │   ├── layout/       # Sidebar, TopBar, Layout
-│       │   └── ui/           # KpiCard, DataTable, StatusBadge, Modal...
-│       ├── services/         # api.ts + mockData.ts
-│       ├── context/          # ThemeContext (dark/light)
-│       └── types/            # TypeScript types
-└── docker-compose.yml
-```
 
----
 
-## Endpoints da API
 
-| Método | Rota                          | Descrição                        |
-|--------|-------------------------------|----------------------------------|
-| GET    | /api/dashboard/resumo         | KPIs do mês atual                |
-| GET    | /api/dashboard/evolucao       | Evolução de recuperações         |
-| GET    | /api/acionamentos             | Lista paginada + filtros         |
-| POST   | /api/acionamentos             | Criar acionamento                |
-| GET    | /api/acionamentos/stats       | Totais por tipo/status/operador  |
-| GET    | /api/boletos                  | Lista paginada + filtros         |
-| POST   | /api/boletos                  | Emitir boleto                    |
-| PATCH  | /api/boletos/:id/status       | Atualizar status                 |
-| GET    | /api/recuperacoes             | Lista paginada + filtros         |
-| POST   | /api/recuperacoes             | Registrar recuperação            |
-| GET    | /api/recuperacoes/ranking     | Top operadores                   |
-| GET    | /api/dividas                  | Carteira de dívidas              |
-| GET    | /api/acordos                  | Lista de acordos                 |
+🤝 Contribuição
+# Fork
+git checkout -b feature/minha-feature
 
----
 
-## Variáveis de Ambiente — Backend
+# Commit
+git commit -m "feat: nova feature"
 
-```env
-DATABASE_URL=postgresql://user:pass@localhost:5432/cobranca
-PORT=3001
-NODE_ENV=development
-META_MENSAL=250000
-```
+
+# Push
+git push origin feature/minha-feature
+🧭 Roadmap
+
+
+📬 Contato
+👤 Mauricio EMAIL: mfo.oliveira0013@gmail.com
+🔗 GitHub: https://github.com/Mfoliveira013
+⭐ Se curtir
+
+Dá uma estrela no repositório ⭐
