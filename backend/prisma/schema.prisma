@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum StatusHigienizacao {
+  pendente
+  higienizado
+  obito
+  desconhecido
+}
+
+enum AmbienteCobranca {
+  extrajudicial
+  judicial
+}
+
+enum StatusDivida {
+  em_aberto
+  negociando
+  acordo
+  pago
+  perdido
+}
+
+enum TipoAcordo {
+  a_vista
+  parcelado
+}
+
+enum StatusAcordo {
+  ativo
+  quebrado
+  quitado
+}
+
+enum StatusBoleto {
+  emitido
+  pago
+  vencido
+  cancelado
+}
+
+enum FormaPagamento {
+  boleto
+  pix
+  deposito
+  acordo
+}
+
+model Devedor {
+  id                  String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nome                String             @db.VarChar(200)
+  cpf_cnpj            String             @unique @db.VarChar(18)
+  telefone            String?            @db.VarChar(20)
+  email               String?            @db.VarChar(150)
+  endereco            String?
+  status_higienizacao StatusHigienizacao @default(pendente)
+  created_at          DateTime           @default(now())
+
+  acionamentos Acionamento[]
+  dividas      Divida[]
+  boletos      Boleto[]
+  recuperacoes Recuperacao[]
+  acordos      Acordo[]
+
+  @@map("devedores")
+}
+
+model Acionamento {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  devedor_id       String           @db.Uuid
+  divida_id        String?          @db.Uuid
+  ambiente         AmbienteCobranca
+  tabulacao        String           @db.VarChar(100)
+  operador         String?          @db.VarChar(100)
+  observacao       String?
+  data_acionamento DateTime         @default(now())
+
+  devedor Devedor @relation(fields: [devedor_id], references: [id])
+  divida  Divida?  @relation(fields: [divida_id], references: [id])
+
+  @@index([devedor_id])
+  @@index([divida_id])
+  @@index([ambiente])
+  @@index([tabulacao])
+  @@index([data_acionamento])
+  @@index([operador])
+  @@map("acionamentos")
+}
+
+model Divida {
+  id                  String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  devedor_id          String           @db.Uuid
+  contrato            String?          @db.VarChar(100)
+  valor_original      Decimal          @db.Decimal(15, 2)
+  valor_atualizado    Decimal?         @db.Decimal(15, 2)
+  data_vencimento     DateTime?        @db.Date
+  status              StatusDivida
+  ambiente            AmbienteCobranca
+  numero_processo     String?          @db.VarChar(50)
+  tentativas_acionamento Int           @default(0)
+  created_at          DateTime         @default(now())
+
+  devedor      Devedor       @relation(fields: [devedor_id], references: [id])
+  acionamentos Acionamento[]
+  boletos      Boleto[]
+  recuperacoes Recuperacao[]
+  acordos      Acordo[]
+
+  @@index([devedor_id])
+  @@index([status])
+  @@index([ambiente])
+  @@index([numero_processo])
+  @@index([data_vencimento])
+  @@map("dividas")
+}
+
+model Boleto {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  divida_id       String       @db.Uuid
+  devedor_id      String       @db.Uuid
+  acordo_id       String?      @db.Uuid
+  valor           Decimal      @db.Decimal(15, 2)
+  vencimento      DateTime     @db.Date
+  status          StatusBoleto
+  codigo_barras   String?
+  linha_digitavel String?
+  emitido_em      DateTime     @default(now())
+  pago_em         DateTime?
+
+  divida       Divida        @relation(fields: [divida_id], references: [id])
+  devedor      Devedor       @relation(fields: [devedor_id], references: [id])
+  acordo       Acordo?       @relation(fields: [acordo_id], references: [id])
+  recuperacoes Recuperacao[]
+
+  @@index([devedor_id])
+  @@index([divida_id])
+  @@index([acordo_id])
+  @@index([status])
+  @@index([vencimento])
+  @@map("boletos")
+}
+
+model Recuperacao {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  divida_id        String           @db.Uuid
+  devedor_id       String           @db.Uuid
+  boleto_id        String?          @db.Uuid
+  acordo_id        String?          @db.Uuid
+  ambiente         AmbienteCobranca
+  valor_recuperado Decimal          @db.Decimal(15, 2)
+  forma_pagamento  FormaPagamento?
+  data_pagamento   DateTime         @db.Date
+  operador         String?          @db.VarChar(100)
+  created_at       DateTime         @default(now())
+
+  divida  Divida   @relation(fields: [divida_id], references: [id])
+  devedor Devedor  @relation(fields: [devedor_id], references: [id])
+  boleto  Boleto?  @relation(fields: [boleto_id], references: [id])
+  acordo  Acordo?  @relation(fields: [acordo_id], references: [id])
+
+  @@index([devedor_id])
+  @@index([acordo_id])
+  @@index([ambiente])
+  @@index([data_pagamento])
+  @@index([operador])
+  @@map("recuperacoes")
+}
+
+model Acordo {
+  id                 String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  divida_id          String           @db.Uuid
+  devedor_id         String           @db.Uuid
+  ambiente           AmbienteCobranca
+  tipo_acordo        TipoAcordo
+  valor_total        Decimal          @db.Decimal(15, 2)
+  num_parcelas       Int?
+  valor_entrada      Decimal?         @db.Decimal(15, 2)
+  valor_parcela      Decimal?         @db.Decimal(15, 2)
+  data_primeiro_venc DateTime?        @db.Date
+  desconto_aplicado  Decimal?         @db.Decimal(8, 2)
+  status             StatusAcordo
+  operador           String?          @db.VarChar(100)
+  numero_processo    String?          @db.VarChar(50)
+  audiencia_prevista DateTime?        @db.Date
+  created_at         DateTime         @default(now())
+
+  divida       Divida        @relation(fields: [divida_id], references: [id])
+  devedor      Devedor       @relation(fields: [devedor_id], references: [id])
+  boletos      Boleto[]
+  recuperacoes Recuperacao[]
+
+  @@index([devedor_id])
+  @@index([divida_id])
+  @@index([ambiente])
+  @@index([status])
+  @@index([numero_processo])
+  @@map("acordos")
+}
